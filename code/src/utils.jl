@@ -21,7 +21,6 @@ function generate_points(N, K, D, std, seed = 42)
     return points
 end
 
-
 function mean_silhouette_score(assignment, counts, points)
     """
     Compute the mean silhouette score of a clustering assignment.
@@ -34,8 +33,6 @@ function mean_silhouette_score(assignment, counts, points)
     
     return mean(silhouettes(assignment, counts, distances))
 end
-
-
 
 function euclidean_distance_1(points)
     """
@@ -52,7 +49,7 @@ function euclidean_distance_1(points)
         end
     end
     
-    return distances^2
+    return distances
 end
 
 function euclidean_distance_2(points)
@@ -74,7 +71,7 @@ function euclidean_distance_2(points)
     # Copy upper triangle to lower triangle
     distances = distances + distances'
 
-    return distances.^2
+    return distances
 end
 
 function euclidean_distance_3(points)
@@ -86,9 +83,8 @@ function euclidean_distance_3(points)
     N = size(points, 1)
     distances = sqrt.(sum(abs2.(points'), dims=1)' .+ sum(abs2.(points'), dims=1) .- 2 .* (points * points'))
 
-    return distances.^2
+    return distances
 end
-
 
 function manhattan_distance_1(points)
     """
@@ -103,6 +99,8 @@ function manhattan_distance_1(points)
         for j in 1:N
             distances[i,j] = sum(abs.(points[i,:] - points[j,:]))
         end
+    
+    return distances
 end
 
 function manhattan_distance_2(points)
@@ -127,7 +125,7 @@ function manhattan_distance_2(points)
     return distances
 end
 
-function manhattan_distance(points)
+function manhattan_distance_3(points)
     """
     Compute the pairwise Manhattan distance between all points in the dataset.
 
@@ -137,12 +135,6 @@ function manhattan_distance(points)
     X = reshape(repeat(points, outer = (N, 1)), N, N, :)
     Y = reshape(repeat(points', inner = (N, 1)), N, N, :)
     return sum(abs.(X .- Y), dims = 3)
-end
-
-
-
-
-    return distances
 end
 
 function get_centroids(assignments, data)
