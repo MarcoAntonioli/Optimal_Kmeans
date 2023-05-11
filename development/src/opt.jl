@@ -6,7 +6,7 @@ function gamma_formulation(data::Matrix{Float64}, K::Int64)
     #D = size(data, 2)
 
     model = JuMP.Model(Gurobi.Optimizer)
-    #set_optimizer_attribute(model, "OutputFlag", 0)
+    set_optimizer_attribute(model, "OutputFlag", 0)
 
     #--------------Decision Variables----------------#
 
@@ -26,7 +26,6 @@ function gamma_formulation(data::Matrix{Float64}, K::Int64)
 
     # Constraint to move the objective function
     @constraint(model, [i=1:N, k=1:K], [θ[i,k]; sum((1/l) * (sum(γ[i,j,k,l] * (data[i,:] - data[j,:]) for j=1:N)) for l=1:N-K+1)] in SecondOrderCone())
-    #@constraint(model, θ >= sum(sum(norm(sum((1/l) * (sum(γ[i,j,k,l]*(data[i,:] - data[j,:]) for j=1:N)) for l=1:N-K+1)) for k=1:K) for i=1:N))
     
     # Assignment constraints
     @constraint(model, [i=1:N], sum(a[i,k] for k=1:K) == 1) # Each data point is assigned to exactly one cluster
@@ -42,6 +41,8 @@ function gamma_formulation(data::Matrix{Float64}, K::Int64)
     @constraint(model, [i=1:N, j=1:N, k=1:K, l=1:N-K+1], γ[i,j,k,l] <= b[l,k])
     @constraint(model, [i=1:N, j=1:N, k=1:K, l=1:N-K+1], γ[i,j,k,l] >= f[i,j,k] + b[l,k] - 1)
 
+    @constraint(model, [k=1:K], sum(b[l,k] for l=1:N-K+1) == 1) # Each cluster has exactly one b[l,k] equal to 1
+
     optimize!(model)
-    return value.(a), value.(θ), value.(f), value.(b), value.(γ)
+    return value.(a)#, value.(θ), value.(f), value.(b), value.(γ)
 end
