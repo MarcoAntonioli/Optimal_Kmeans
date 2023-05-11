@@ -6,7 +6,7 @@ function gamma_formulation(data::Matrix{Float64}, K::Int64)
     #D = size(data, 2)
 
     model = JuMP.Model(Gurobi.Optimizer)
-    set_optimizer_attribute(model, "OutputFlag", 0)
+    #set_optimizer_attribute(model, "OutputFlag", 0)
 
     #--------------Decision Variables----------------#
 
@@ -43,5 +43,5 @@ function gamma_formulation(data::Matrix{Float64}, K::Int64)
     @constraint(model, [i=1:N, j=1:N, k=1:K, l=1:N-K+1], γ[i,j,k,l] >= f[i,j,k] + b[l,k] - 1)
 
     optimize!(model)
-    return value.(a)
+    return value.(a), value.(θ), value.(f), value.(b), value.(γ)
 end
