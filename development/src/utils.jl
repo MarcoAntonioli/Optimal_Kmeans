@@ -1,22 +1,25 @@
 using CSV, Tables, LinearAlgebra, Random, Gurobi, JuMP, DataFrames, Statistics, MLJ, Plots, Clustering, Distances
 
-function generate_points(N, K, D, std, seed = 42)
+function generate_points(K::Int64, N::Int64, D::Int64 , std::Float64, seed = 42)
     """
-    Generate a random dataset of N points with K clusters of dimensionality D.
+    Generates points for the k-means problem
 
-    N: number of points in the dataset
-    K: number of clusters
-    D: dimensionality of the points
-    std: standard deviation of each cluster
-    seed: random seed (optional)
+        input: 
+            - K: number of clusters 
+            - N: number of points
+            - D: dimnesionality of points
+            - std: standard deviation of each cluster
+            - seed: random seed (optional)
+
+        output:
+            - points: NxD matrix of standardized points
     """
-    Random.seed!(seed)
-    X, yy = make_blobs(N, D; centers=K, cluster_std=std)
-    
-    points = Matrix(DataFrame(X))
-    min = minimum(points, dims=1)
-    max = maximum(points, dims=1)
-    points = (points .- min) ./ (max .- min)
+    Random.seed!(seed);
+    X, yy = MLJ.make_blobs(N, D; centers=K, cluster_std=std)
+    points = Matrix(DataFrame(X));
+    min = minimum(points, dims=1);
+    max = maximum(points, dims=1);
+    points = (points .- min) ./ (max .- min);
     
     return points
 end
@@ -99,6 +102,7 @@ function manhattan_distance_1(points)
         for j in 1:N
             distances[i,j] = sum(abs.(points[i,:] - points[j,:]))
         end
+    end
     
     return distances
 end
@@ -152,4 +156,23 @@ function get_centroids(assignments, data)
         centroids[k,:] = sum(assignments[i,k] * data[i,:] for i=1:N) / sum(assignments[i,k] for i=1:N)
     end
     return centroids
+end
+
+function compute_cluster_centroid_cost(assignments::Vector{Int64})
+    """
+    Computes the centroid and cost of a cluster given the indeces of the points in the cluster
+
+        input: 
+            - assignments: Nx1 matrix of cluster assignments
+
+        output:
+            - cost of the clustering assignment
+            - Vector representing the centroid of the cluster
+    """
+
+    cluster_points = points[assignments,:]
+
+    centroid = mean(cluster_points, dims=1)
+
+    return sum( euclidean(cluster_points[i,:],centroid) for i in 1:size(cluster_points,1)), vec(centroid)
 end
