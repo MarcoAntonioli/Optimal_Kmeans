@@ -7,6 +7,7 @@ function gamma_formulation(data::Matrix{Float64}, K::Int64)
 
     model = JuMP.Model(Gurobi.Optimizer)
     set_optimizer_attribute(model, "OutputFlag", 0)
+    set_optimizer_attribute(model, "TimeLimit", 300)
 
     #--------------Decision Variables----------------#
 
@@ -44,5 +45,5 @@ function gamma_formulation(data::Matrix{Float64}, K::Int64)
     @constraint(model, [k=1:K], sum(b[l,k] for l=1:N-K+1) == 1) # Each cluster has exactly one b[l,k] equal to 1
 
     optimize!(model)
-    return value.(a)#, value.(θ), value.(f), value.(b), value.(γ)
+    return value.(a), solution_summary(model)#, value.(θ), value.(f), value.(b), value.(γ)
 end
