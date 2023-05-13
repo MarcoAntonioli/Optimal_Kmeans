@@ -1,152 +1,70 @@
 using CSV, Tables, LinearAlgebra, Random, Gurobi, JuMP, DataFrames, Statistics, MLJ, Plots, Clustering, Distances
 
-function generate_points(K::Int64, N::Int64, D::Int64 , std::Float64, seed = 42)
+function generate_points(K::Int64, N::Int64, D::Int64 , std::Float64, seed = 1234)
     """
     Generates points for the k-means problem
 
         input: 
-            - K: number of clusters 
+            - K: number of clusters
             - N: number of points
-            - D: dimnesionality of points
-            - std: standard deviation of each cluster
-            - seed: random seed (optional)
+            - D: dimension of the points
+            - std: standard deviation of the clusters
+            - seed: seed for the random number generator
 
         output:
-            - points: NxD matrix of standardized points
+            - data: NxD matrix of standardized points
     """
     Random.seed!(seed);
     X, yy = MLJ.make_blobs(N, D; centers=K, cluster_std=std)
-    points = Matrix(DataFrame(X));
-    min = minimum(points, dims=1);
-    max = maximum(points, dims=1);
-    points = (points .- min) ./ (max .- min);
-    
-    return points
+    data = Matrix(DataFrame(X));
+    min = minimum(data, dims=1);
+    max = maximum(data, dims=1);
+    data = (data .- min) ./ (max .- min);
+    return data
 end
 
-function mean_silhouette_score(assignment, counts, points)
-    """
-    Compute the mean silhouette score of a clustering assignment.
-
-    assignment: a vector of length N containing the cluster assignment of each point
-    counts: a vector of length K containing the number of points in each cluster
-    points: a matrix of size (D,N) containing the points in the dataset
-    """
-    distances = pairwise(Euclidean(), points')
-    
-    return mean(silhouettes(assignment, counts, distances))
-end
-
-function euclidean_distance_1(points)
+function euclidean_distance(data::Matrix{Float64})
     """
     Compute the pairwise Euclidean distance between all points in the dataset.
 
-    points: a matrix of size (N,D) containing the points in the dataset
+        input: 
+            - data: a matrix of size (N,D) containing the points in the dataset
+        
+        output:
+            - distances: a matrix of size (N,N) containing the pairwise Euclidean distance between all points
     """
-    N = size(points,1)
-    distances = ones((N,N))
-    
-    for i in 1:N
-        for j in 1:N
-            distances[i,j] = sqrt(sum((points[i,:] - points[j,:]).^2))
-        end
-    end
-    
-    return distances
-end
-
-function euclidean_distance_2(points)
-    """
-    Compute the pairwise Euclidean distance between all points in the dataset.
-
-    points: a matrix of size (N,D) containing the points in the dataset
-    """
-    N = size(points, 1)
-    distances = zeros(N,N)
-
-    # Compute upper triangle of distance matrix
-    for i in 1:N-1
-        for j in i+1:N
-            distances[i,j] = sqrt(sum((points[i,:] .- points[j,:]).^2))
-        end
-    end
-
-    # Copy upper triangle to lower triangle
-    distances = distances + distances'
+    N = size(data, 1)
+    distances = sqrt.(sum(abs2.(data'), dims=1)' .+ sum(abs2.(data'), dims=1) .- 2 .* (data * data'))
 
     return distances
 end
 
-function euclidean_distance_3(points)
-    """
-    Compute the pairwise Euclidean distance between all points in the dataset.
-
-    points: a matrix of size (N,D) containing the points in the dataset
-    """
-    N = size(points, 1)
-    distances = sqrt.(sum(abs2.(points'), dims=1)' .+ sum(abs2.(points'), dims=1) .- 2 .* (points * points'))
-
-    return distances
-end
-
-function manhattan_distance_1(points)
+function manhattan_distance(data::Matrix{Float64})
     """
     Compute the pairwise Manhattan distance between all points in the dataset.
 
-    points: a matrix of size (N,D) containing the points in the dataset
+        input:
+            - data: a matrix of size (N,D) containing the points in the dataset
+        
+        output:
+            - distances: a matrix of size (N,N) containing the pairwise Manhattan distance between all points
     """
-    N = size(points, 1)
-    distances = ones((N,N))
-
-    for i in 1:N
-        for j in 1:N
-            distances[i,j] = sum(abs.(points[i,:] - points[j,:]))
-        end
-    end
-    
-    return distances
-end
-
-function manhattan_distance_2(points)
-    """
-    Compute the pairwise Manhattan distance between all points in the dataset.
-
-    points: a matrix of size (N,D) containing the points in the dataset
-    """
-    N = size(points, 1)
-    distances = zeros(N,N)
-
-    # Compute upper triangle of distance matrix
-    for i in 1:N-1
-        for j in i+1:N
-            distances[i,j] = sum(abs.(points[i,:] .- points[j,:]))
-        end
-    end
-
-    # Copy upper triangle to lower triangle
-    distances = distances + distances'
-
-    return distances
-end
-
-function manhattan_distance_3(points)
-    """
-    Compute the pairwise Manhattan distance between all points in the dataset.
-
-    points: a matrix of size (N,D) containing the points in the dataset
-    """
-    N = size(points, 1)
-    X = reshape(repeat(points, outer = (N, 1)), N, N, :)
-    Y = reshape(repeat(points', inner = (N, 1)), N, N, :)
+    N = size(data, 1)
+    X = reshape(repeat(data, outer = (N, 1)), N, N, :)
+    Y = reshape(repeat(data', inner = (N, 1)), N, N, :)
     return sum(abs.(X .- Y), dims = 3)
 end
 
-function get_centroids(assignments, data)
+function get_centroids(assignments::Matrix{Float64}, data::Matrix{Float64})
     """
     Compute the centroids of the clusters given a clustering assignment and the data.
 
-    assignments: a matrix of size (N,K) containing the cluster assignment of each point
-    data: a matrix of size (N,D) containing the points in the dataset
+        input: 
+            - assignments: a matrix of size (N,K) containing the cluster assignment of each point
+            - data: a matrix of size (N,D) containing the points in the dataset
+        
+        output:
+            - centroids: a matrix of size (K,D) containing the centroids of the clusters
     """
     K = size(assignments, 2)
     N, D = size(data)
@@ -158,7 +76,7 @@ function get_centroids(assignments, data)
     return centroids
 end
 
-function compute_cluster_centroid_cost(assignments::Vector{Int64})
+function compute_cluster_centroid_cost(data::Matrix{Float64}, assignments::Vector{Int64})
     """
     Computes the centroid and cost of a cluster given the indeces of the points in the cluster
 
@@ -170,9 +88,89 @@ function compute_cluster_centroid_cost(assignments::Vector{Int64})
             - Vector representing the centroid of the cluster
     """
 
-    cluster_points = points[assignments,:]
-
+    cluster_points = data[assignments,:]
     centroid = mean(cluster_points, dims=1)
 
     return sum( euclidean(cluster_points[i,:],centroid) for i in 1:size(cluster_points,1)), vec(centroid)
+end
+
+struct Cluster 
+    """
+    Cluster data structure
+        methods: 
+            - assignments: Nx1 matrix of cluster assignments
+            - centroid: Vector representing the centroid of the cluster
+            - cost: cost of the clustering assignment
+    """
+    assignments::Vector{Int64}
+    centroid::Vector{Float64}
+    cost::Float64
+end
+
+function compute_reduced_cost(cluster::Cluster, p::Vector{Float64}, q::Float64)
+    """
+    Computes the reduced cost given a dual solution of the master problem
+    
+        input: 
+            - cluster: cluster to compute the reduced cost for
+            - p: dual solution of the master problem
+            - q: dual solution of the master problem
+    
+        output: reduced cost of the cluster
+    """
+    
+        return cluster.cost - sum(p[i] for i in cluster.assignments) - q
+end
+
+function subproblem_heuristic(data::Matrix{Float64}, p::Vector{Float64}, q::Float64, Iter::Int64, K::Int64)
+    """
+    Computes the subproblem heuristic for the k-means problem
+
+        input: 
+            - data: a matrix of size (N,D) containing the points in the dataset
+            - p: dual solution of the master problem
+            - q: dual solution of the master problem
+            - Iter: number of iterations to run the heuristic
+            - K: number of clusters
+
+        output:
+            - cluster: a Cluster object containing the cluster assignment, centroid and cost
+            - reduced_cost: reduced cost of the cluster
+    """
+
+    clusters = Cluster[]
+    for i = 1:15
+        append!(clusters, initial_clusters(data, K, 1, Iter * i ))
+    end
+    idx = argmin([compute_reduced_cost(cluster, p, q) for cluster in clusters])
+
+    return clusters[idx], compute_reduced_cost(clusters[idx], p, q)
+end 
+
+function initial_clusters(data::Matrix{Float64}, K::Int64, n_initial_clusters::Int64, seed::Int64 = 1)
+    """
+    Computes the initial clusters for the k-means problem
+
+        input: 
+            - data: a matrix of size (N,D) containing the points in the dataset
+            - K: number of clusters
+            - n_initial_clusters: number of initial clusters to compute
+            - seed: seed for the random number generator
+
+        output:
+            - clusters: a vector of size (n_initial_clusters*K) containing the initial clusters
+    """
+
+    clusters = Cluster[]
+
+    for i in 1:n_initial_clusters
+        Random.seed!(seed * i)
+        km =  kmeans(data', K).assignments
+        for k in 1:K
+            assinments = findall(x->x==k, km); 
+            cost, centroid = compute_cluster_centroid_cost(data, assinments)
+            push!(clusters, Cluster(assinments, centroid, cost))
+        end
+    end
+    return clusters
 end
