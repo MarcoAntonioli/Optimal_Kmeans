@@ -121,7 +121,6 @@ function new_cluster(data::Matrix{Float64}, p::Vector{Float64}, q::Float64, K::I
 end 
 
 function column_generation(data::Matrix{Float64}, K::Int64, n_initial_clusters::Int64, max_iterations::Int = 10000, verbose::Bool = true)
-
     """
     Column generation algorithm for the k-means problem
 
