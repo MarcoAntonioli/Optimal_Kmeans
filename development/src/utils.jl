@@ -20,6 +20,7 @@ function generate_points(K::Int64, N::Int64, D::Int64 , std::Float64, seed = 123
     min = minimum(data, dims=1);
     max = maximum(data, dims=1);
     data = (data .- min) ./ (max .- min);
+
     return data
 end
 
@@ -52,6 +53,7 @@ function manhattan_distance(data::Matrix{Float64})
     N = size(data, 1)
     X = reshape(repeat(data, outer = (N, 1)), N, N, :)
     Y = reshape(repeat(data', inner = (N, 1)), N, N, :)
+
     return sum(abs.(X .- Y), dims = 3)
 end
 
@@ -73,6 +75,7 @@ function get_centroids(assignments::Matrix{Float64}, data::Matrix{Float64})
     for k=1:K
         centroids[k,:] = sum(assignments[i,k] * data[i,:] for i=1:N) / sum(assignments[i,k] for i=1:N)
     end
+
     return centroids
 end
 
@@ -119,7 +122,7 @@ function compute_reduced_cost(cluster::Cluster, p::Vector{Float64}, q::Float64)
         output: reduced cost of the cluster
     """
     
-        return cluster.cost - sum(p[i] for i in cluster.assignments) - q
+    return cluster.cost - sum(p[i] for i in cluster.assignments) - q
 end
 
 function subproblem_heuristic(data::Matrix{Float64}, p::Vector{Float64}, q::Float64, Iter::Int64, K::Int64)
@@ -137,8 +140,8 @@ function subproblem_heuristic(data::Matrix{Float64}, p::Vector{Float64}, q::Floa
             - cluster: a Cluster object containing the cluster assignment, centroid and cost
             - reduced_cost: reduced cost of the cluster
     """
-
     clusters = Cluster[]
+    
     for i = 1:15
         append!(clusters, initial_clusters(data, K, 1, Iter * i ))
     end
