@@ -2,13 +2,12 @@
 
 This is the repository for the project for the integer optimization class at MIT.
 
-**The Cauchy-Schwarz Inequality**
-$$\left( \sum_{k=1}^n a_k b_k \right)^2 \leq \left( \sum_{k=1}^n a_k^2 \right) \left( \sum_{k=1}^n b_k^2 \right)$$
-
 ## Introduction 
 
 Given a set of observations $(x_1, x_2, ... , x_n)$, where each observation is a d-dimensional real vector, k-means clustering aims to partition the n observations into k ($\leq n$) sets $S = {S_1, S_2, ..., S_k}$ so as to minimize the within-cluster sum of squares. The objective is to find:
-$${\underset {\mathbf {S} }{\arg \min }}\sum _{i=1}^{k}\sum _{\mathbf{x} \in S_{i}}\left\|\mathbf {x} - c_{i}\right\|^{2}$$
+$$
+{\underset {\mathbf {S} }{\arg \min }}\sum _{i=1}^{k}\sum _{\mathbf{x} \in S_{i}}\left\|\mathbf {x} - c_{i}\right\|^{2}
+$$
 One of the most widely used methods to solve this problem is the K-means algorithm. This algorithm starts with a random assignment of k centroids, then it enters in a loop where each point is assigned to one centroid in the current set of centroids, and each centroid is then recalculated as the mean of the point in the cluster, until convergence. 
 
 Given the random initialization component, the algorithm lacks provable optimality and presents stability issues. For this reason, we aim at re-formulating the problem as a Mixed Integer Optimization problem (MIO), and try to propose a method to solve it. 
@@ -85,7 +84,7 @@ $$
 \end{equation}
 $$
 
-### Subproblem solution
+### **Subproblem solution**
 
 The suproblem formulation is itself as complicates as the full linearization of the MIO problem P, for this reason, we developed a Heuristic method to be able to have "good" clustering solutions very efficiently, and add clusters iteratively to the set of clusters $C_{0}$.
 
