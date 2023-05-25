@@ -6,6 +6,10 @@ This is the repository for the project for the integer optimization class at MIT
 <img src="https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN-199x250.png">
 </p>
 
+[img]http://www.sciweavers.org/tex2img.php?eq=%5Cbegin%7Bequation%7D%0A%5Cbegin%7Baligned%7D%0A%20%20%20%20%5Cmin_%7Ba%7D%20%26%09%5Cquad%20%20%5Csum_%7Bi%3D1%7D%5E%7BN%7D%20%5Csum_%7Bk%3D1%7D%5E%7BK%7D%20a_%7Bik%7D%20%5Cleft%5CrVert%20x_%7Bi%7D%20-%20%5Cfrac%7B%5Csum_%7Bj%3D1%7D%5E%7BN%7D%20x_%7Bj%7Da_%7Bjk%7D%7D%7B%5Csum_%7Bj%3D1%7D%5E%7BN%7D%20a_%7Bjk%7D%7D%20%5Cright%5CrVert%20_%7B2%7D%5E%7B2%7D%20%5C%5C%0A%20%20%20%20%5Ctext%7Bs.t.%7D%09%26%20%5Cquad%09%5Csum_%7Bk%3D1%7D%5E%7BK%7D%20a_%7Bik%7D%20%3D%201%20%5Cquad%20%5Cforall%20i%20%5Cin%20%5BN%5D%20%5C%5C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20%5Cquad%09%5Csum_%7Bi%3D1%7D%5E%7BN%7D%20a_%7Bik%7D%20%5Cgeq%201%20%5Cquad%20%5Cforall%20k%20%5Cin%20%5BK%5D%20%5C%5C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20%5Cquad%20a_%7Bik%7D%20%5Cin%20%5C%7B0%2C1%5C%7D%20%5Cquad%20%5Cforall%20i%20%5Cin%20%5BN%5D%2C%20%5Cforall%20k%20%5Cin%20%5BK%5D%0A%5Cend%7Baligned%7D%0A%5Ctag%7BKP%7D%5Clabel%7BKP%7D%0A%5Cend%7Bequation%7D&bc=White&fc=Black&im=png&fs=12&ff=arev&edit=0[/img]
+
+
+
 ## Introduction 
 
 Given a set of observations $(x_1, x_2, ... , x_n)$, where each observation is a d-dimensional real vector, k-means clustering aims to partition the n observations into k ($\leq n$) sets $S = {S_1, S_2, ..., S_k}$ so as to minimize the within-cluster sum of squares. The objective is to find:
