@@ -136,6 +136,5 @@ As it can be seen, the K-means proposed solution is clearly not the best one, wh
 We now focus our attention on the performance of our column generation algorithm against K-means on different problem instances. We experimented for standard deviations equal to 1.5, 3, and 4.5, for number of points equal to 100, 300, 500, 700 and 1000 and for number of clusters equal to 2,3,4 and 5. For every combination of parameters we run 20 different problems, we averaged the results of those 20 to better understand the behaviour of the heuristic under the different scenarios. Over all of our tests we saw an average decrease of 2% in the cost. Here we will present the tables with the results. Every set of tables corresponds to a different standard deviation value, and in the tables the columns are the number of points and the rows are the number of clusters. The values in the table are the sum of the squared distances between the points and their assigned centroid, averaged across the 20 runs that we did with the similar setting.
 
 <p align="center">
-<img src="imgs/Tables
-.png" width="800"/>
+<img src="imgs/Tables.png" width="800"/>
 </p>
