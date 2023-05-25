@@ -3,11 +3,7 @@
 This is the repository for the project for the integer optimization class at MIT.
 
 <p align="center">
-<img src="https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN-199x250.png" alt="Raspberry pi" style="width:20%; border:0;">
-</p>
-
-<p align="center">
-![logo](https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN-199x250.png "Raspberry pi")
+<img src="https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN-199x250.png">
 </p>
 
 ## Introduction 
