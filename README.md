@@ -6,6 +6,10 @@ This is the repository for the project for the integer optimization class at MIT
 <img src="https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN-199x250.png" alt="Raspberry pi" style="width:20%; border:0;">
 </p>
 
+<p align="center">
+![logo](https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN-199x250.png "Raspberry pi")
+</p>
+
 ## Introduction 
 
 Given a set of observations $(x_1, x_2, ... , x_n)$, where each observation is a d-dimensional real vector, k-means clustering aims to partition the n observations into k ($\leq n$) sets $S = {S_1, S_2, ..., S_k}$ so as to minimize the within-cluster sum of squares. The objective is to find:
