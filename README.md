@@ -2,7 +2,9 @@
 
 This is the repository for the project for the integer optimization class at MIT.
 
-![equation](https://latex.codecogs.com/gif.image?\dpi{110}\begin{equation}\begin{aligned}&space;&space;&space;&space;\min_{a}&space;&&space;\quad&space;&space;\sum_{i=1}^{N}&space;\sum_{k=1}^{K}&space;a_{ik}&space;\left\rVert&space;x_{i}&space;-&space;\frac{\sum_{j=1}^{N}&space;x_{j}a_{jk}}{\sum_{j=1}^{N}&space;a_{jk}}&space;\right\rVert&space;_{2}^{2}&space;\\&space;&space;&space;&space;\text{s.t.}&space;&&space;\quad&space;\sum_{k=1}^{K}&space;a_{ik}&space;=&space;1&space;\quad&space;\forall&space;i&space;\in&space;[N]&space;\\&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&&space;\quad&space;\sum_{i=1}^{N}&space;a_{ik}&space;\geq&space;1&space;\quad&space;\forall&space;k&space;\in&space;[K]&space;\\&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&space;&&space;\quad&space;a_{ik}&space;\in&space;\{0,1\}&space;\quad&space;\forall&space;i&space;\in&space;[N],&space;\forall&space;k&space;\in&space;[K]\end{aligned}\tag{KP}\label{KP}\end{equation})
+<p align="center">
+<img src="https://www.raspberrypi.org/app/uploads/2018/03/RPi-Logo-Reg-SCREEN-199x250.png" alt="Raspberry pi" style="width:20%; border:0;">
+</p>
 
 ## Introduction 
 
