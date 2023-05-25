@@ -1,4 +1,5 @@
 using Gurobi, JuMP
+include("utils.jl")
 
 function direct_solve(data::Matrix{Float64}, K::Int64)
     """
@@ -12,7 +13,6 @@ function direct_solve(data::Matrix{Float64}, K::Int64)
     """
     # Get the number of data points and dimensions in the data
     N = size(data, 1)
-    #D = size(data, 2)
 
     model = JuMP.Model(Gurobi.Optimizer)
     set_optimizer_attribute(model, "OutputFlag", 0)
@@ -30,7 +30,6 @@ function direct_solve(data::Matrix{Float64}, K::Int64)
 
     # Objective function to minimize the sum of the squared Euclidean distances between data points and their assigned cluster centers
     @objective(model, Min, sum(sum(θ[i,k] for i=1:N) for k=1:K))
-    #@objective(model, Min, sum(sum(norm(sum((1/l) * (sum(γ[i,j,k,l]*(data[i,:] - data[j,:]) for j=1:N)) for l=1:N-K+1))^2 for k=1:K) for i=1:N))
 
     #----------------Constraints---------------------#
 
@@ -54,6 +53,7 @@ function direct_solve(data::Matrix{Float64}, K::Int64)
     @constraint(model, [k=1:K], sum(b[l,k] for l=1:N-K+1) == 1) # Each cluster has exactly one b[l,k] equal to 1
 
     optimize!(model)
+
     return value.(a), solution_summary(model)#, value.(θ), value.(f), value.(b), value.(γ)
 end
 
@@ -74,11 +74,15 @@ function new_cluster(data::Matrix{Float64}, p::Vector{Float64}, q::Float64, K::I
     """
 
     N = size(data,1)
-    D = size(data,2)
+    
+    #------------------------------------------------#
+    #------------Subproblem Formulation--------------#
+    #------------------------------------------------#
 
-    ###Subproblem
     sp_model = JuMP.Model(() -> Gurobi.Optimizer(GRB_ENV))
     set_optimizer_attributes( sp_model, "OutputFlag" => 0)
+
+    #--------------Decision Variables----------------#
 
     @variable(sp_model, θ[1:N])
     @variable(sp_model, a[1:N], Bin)
@@ -87,6 +91,17 @@ function new_cluster(data::Matrix{Float64}, p::Vector{Float64}, q::Float64, K::I
     @variable(sp_model, γ[1:N,1:N,1:N-K+1])
     @variable(sp_model, z[1:N,1:N-K+1])
 
+    #--------------Objective Function----------------#
+
+    @objective(sp_model, Min, sum(θ[i] - a[i]*p[i] for i in 1:N))
+
+    #----------------Constraints---------------------#
+
+    # Objective function constraint
+    @constraint(sp_model, [i=1:N], [θ[i]; sum( 1/l .* sum( γ[i,j,l] .* (data[i,:] .- data[j,:]) for j=1:N) for l=1:N-K+1)] in SecondOrderCone())
+
+    
+    # Linearization constraints as in the direct solve
     @constraint(sp_model, [i=1:N, j=1:N], f[i,j] <= a[i])
     @constraint(sp_model, [i=1:N, j=1:N], f[i,j] <= a[j])
     @constraint(sp_model, [i=1:N, j=1:N], f[i,j] >= a[i] + a[j] - 1)
@@ -95,29 +110,23 @@ function new_cluster(data::Matrix{Float64}, p::Vector{Float64}, q::Float64, K::I
     @constraint(sp_model, [i=1:N, j=1:N, l=1:N-K+1], γ[i,j,l] <= f[i,j])
     @constraint(sp_model, [i=1:N, j=1:N, l=1:N-K+1], γ[i,j,l] <= b[l])
     @constraint(sp_model, [i=1:N, j=1:N, l=1:N-K+1], γ[i,j,l] >= f[i,j] + b[l] - 1)
-
     @constraint(sp_model, sum(b[l] for l=1:N-K+1) == 1)
-
-    @constraint(sp_model, [i=1:N], [θ[i]; sum( 1/l .* sum( γ[i,j,l] .* (data[i,:] .- data[j,:]) for j=1:N) for l=1:N-K+1)] in SecondOrderCone()) #
     
-    ### heuristics constraint
+    # Heuristics constraint
     @constraint(sp_model, [i=1:N, l=1:N-K+1], z[i,l] >= b[l] + a[i] -1)
     @constraint(sp_model, [i=1:N, l=1:N-K+1], z[i,l] <= b[l])
     @constraint(sp_model, [i=1:N, l=1:N-K+1], z[i,l] <= a[i])
     @constraint(sp_model, [i=1:N], [5/(Iter/4); (data[i,:] .- sum(1/l .* sum( data[j,:] * z[j,l] for j in 1:N)  for l in 1:N-K+1))] in SecondOrderCone())
 
-    @objective(sp_model, Min, sum( θ[i] - a[i]*p[i] for i in 1:N))
-
     optimize!(sp_model)
 
-    #### Retrieve cluster from solution
+    # Retrieve cluster from solution
     assignments = vec(findall(x->x>0.9, value.(a)))
     cost, centroid = compute_cluster_centroid_cost(data, assignments)
     Clust = Cluster(assignments, centroid, cost)
     reduced_cost = compute_reduced_cost(Clust, p, q)
 
     return Clust, reduced_cost
-
 end 
 
 function column_generation(data::Matrix{Float64}, K::Int64, n_initial_clusters::Int64, max_iterations::Int = 10000, verbose::Bool = true)
@@ -133,18 +142,18 @@ function column_generation(data::Matrix{Float64}, K::Int64, n_initial_clusters::
 
         output:
             - dictionary with the following keys:
-                - CGIP_solution
-                - CGIP_objective 
-                - CGLP_solution
-                - CGLP_objective
-                - clusters
-                - p_values
-                - q_values
-                - upper_bounds
-                - lower_bounds
-                - MP_time
-                - SP_time
-                - time_taken
+                - CGIP_solution: Solution of prince and branch 
+                - CGIP_objective: Objective value of the price and branch 
+                - CGLP_solution: Solution of the linear relaxation
+                - CGLP_objective: Objective function of the linear relaxation
+                - clusters: cluster solution
+                - p_values: vector of the dual variable p
+                - q_values: vector of the dual variable q
+                - upper_bounds: upper bounds of the column generation
+                - lower_bounds: lower bounds of the column generation
+                - MP_time: total time of the Master problem
+                - SP_time: total time of the Subproblem
+                - time_taken: total solve time
     """
 
     N = size(data,1)
@@ -169,7 +178,8 @@ function column_generation(data::Matrix{Float64}, K::Int64, n_initial_clusters::
 
     while true
         counter += 1
-        # Make restricted master problem with current clusters 
+
+        # Restricted Master Problem (RMP) with current clusters (subset of all of the clusters)
         MP_start_time = time()
         model = JuMP.Model(() -> Gurobi.Optimizer(GRB_ENV))
         set_optimizer_attributes(
