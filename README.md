@@ -12,7 +12,7 @@ Given a set of observations $(x_1, x_2, ... , x_n)$, where each observation is a
 {\underset {\mathbf {S} }{\arg \min }}\sum _{i=1}^{k}\sum _{\mathbf{x} \in S_{i}}\left\|\mathbf {x} - c_{i}\right\|^{2}
 $$ -->
 
-Where $c_i$ is the mean of points in $S_i$: $c_{i}={\frac {1}{|S_{i}|}}\sum _{\mathbf{x} \in S_{i}}\mathbf{x}$.
+Where $c_i$ is the mean of points in $S_i$: $c_{i}={\frac{1}{|S_{i}|}}\sum_{\mathbf{x} \in S_{i}}\mathbf{x}$.
 
 One of the most widely used methods to solve this problem is the K-means algorithm. This algorithm starts with a random assignment of k centroids, then it enters in a loop where each point is assigned to one centroid in the current set of centroids, and each centroid is then recalculated as the mean of the point in the cluster, until convergence. 
 
