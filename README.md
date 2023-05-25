@@ -1,6 +1,6 @@
 # A column generation approach to clustering
 
-This is the repository for the project for the integer optimization class at MIT.
+This is the repository for the Integer Optimization class at MIT. It has been developed by [Marco Antonioli](https://github.com/MarcoAntonioli) and [Mattia Ravasio](https://github.com/MattiaRavasio).
 
 ## Introduction 
 
