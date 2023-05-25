@@ -2,19 +2,18 @@
 
 This is the repository for the project for the integer optimization class at MIT.
 
-<p align="center">
-<img src="http://www.sciweavers.org/tex2img.php?eq=%5Cbegin%7Bequation%7D%0A%5Cbegin%7Baligned%7D%0A%20%20%20%20%5Cmin_%7Ba%7D%20%26%09%5Cquad%20%20%5Csum_%7Bi%3D1%7D%5E%7BN%7D%20%5Csum_%7Bk%3D1%7D%5E%7BK%7D%20a_%7Bik%7D%20%5Cleft%5CrVert%20x_%7Bi%7D%20-%20%5Cfrac%7B%5Csum_%7Bj%3D1%7D%5E%7BN%7D%20x_%7Bj%7Da_%7Bjk%7D%7D%7B%5Csum_%7Bj%3D1%7D%5E%7BN%7D%20a_%7Bjk%7D%7D%20%5Cright%5CrVert%20_%7B2%7D%5E%7B2%7D%20%5C%5C%0A%20%20%20%20%5Ctext%7Bs.t.%7D%09%26%20%5Cquad%09%5Csum_%7Bk%3D1%7D%5E%7BK%7D%20a_%7Bik%7D%20%3D%201%20%5Cquad%20%5Cforall%20i%20%5Cin%20%5BN%5D%20%5C%5C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20%5Cquad%09%5Csum_%7Bi%3D1%7D%5E%7BN%7D%20a_%7Bik%7D%20%5Cgeq%201%20%5Cquad%20%5Cforall%20k%20%5Cin%20%5BK%5D%20%5C%5C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%26%20%5Cquad%20a_%7Bik%7D%20%5Cin%20%5C%7B0%2C1%5C%7D%20%5Cquad%20%5Cforall%20i%20%5Cin%20%5BN%5D%2C%20%5Cforall%20k%20%5Cin%20%5BK%5D%0A%5Cend%7Baligned%7D%0A%5Ctag%7BKP%7D%5Clabel%7BKP%7D%0A%5Cend%7Bequation%7D&bc=White&fc=Black&im=png&fs=12&ff=arev&edit=0" align="center" border="0" alt="\begin{equation}\begin{aligned}    \min_{a} &	\quad  \sum_{i=1}^{N} \sum_{k=1}^{K} a_{ik} \left\rVert x_{i} - \frac{\sum_{j=1}^{N} x_{j}a_{jk}}{\sum_{j=1}^{N} a_{jk}} \right\rVert _{2}^{2} \\    \text{s.t.}	& \quad	\sum_{k=1}^{K} a_{ik} = 1 \quad \forall i \in [N] \\                & \quad	\sum_{i=1}^{N} a_{ik} \geq 1 \quad \forall k \in [K] \\                & \quad a_{ik} \in \{0,1\} \quad \forall i \in [N], \forall k \in [K]\end{aligned}\tag{KP}\label{KP}\end{equation}" width="332" height="208" />
-</p>
-
-
-
-
 ## Introduction 
 
 Given a set of observations $(x_1, x_2, ... , x_n)$, where each observation is a d-dimensional real vector, k-means clustering aims to partition the n observations into k ($\leq n$) sets $S = {S_1, S_2, ..., S_k}$ so as to minimize the within-cluster sum of squares. The objective is to find:
-$$
+<p align="center">
+<img src="imgs/clustering.png" width="200"/>
+</p>
+<!-- $$
 {\underset {\mathbf {S} }{\arg \min }}\sum _{i=1}^{k}\sum _{\mathbf{x} \in S_{i}}\left\|\mathbf {x} - c_{i}\right\|^{2}
-$$
+$$ -->
+
+Where $c_i$ is the mean of points in $S_i$: $c_{i}={\frac {1}{|S_{i}|}}\sum _{\mathbf{x} \in S_{i}}\mathbf{x}$.
+
 One of the most widely used methods to solve this problem is the K-means algorithm. This algorithm starts with a random assignment of k centroids, then it enters in a loop where each point is assigned to one centroid in the current set of centroids, and each centroid is then recalculated as the mean of the point in the cluster, until convergence. 
 
 Given the random initialization component, the algorithm lacks provable optimality and presents stability issues. For this reason, we aim at re-formulating the problem as a Mixed Integer Optimization problem (MIO), and try to propose a method to solve it. 
@@ -23,7 +22,11 @@ Given the random initialization component, the algorithm lacks provable optimali
 
 Using a data matrix $X$ of dimensions $N \times D$, with  $X_{i} \in \mathbb{R}^{D}$ representing a point, and a variable matrix $A$, with each entry $a_{ik} \in \{0,1\}$ indicating whether point $X_{i}$ belongs to cluster $k$, we can formulate the problem. 
 
-$$
+<p align="center">
+<img src="imgs/KP.png" width="800"/>
+</p>
+
+<!-- $$
 \begin{equation}
 \begin{aligned}
     \min_{a} &	\quad  \sum_{i=1}^{N} \sum_{k=1}^{K} a_{ik} \left\rVert x_{i} - \frac{\sum_{j=1}^{N} x_{j}a_{jk}}{\sum_{j=1}^{N} a_{jk}} \right\rVert _{2}^{2} \\
@@ -33,9 +36,14 @@ $$
 \end{aligned}
 \tag{CP}
 \end{equation}
-$$
+$$ -->
 
 This formulation of the Clustering Problem presents non-linearities, and a fractional objective. The linearization of the problem becomes: 
+
+<p align="center">
+<img src="imgs/P.png" width="800"/>
+</p>
+<!-- 
 $$
 \begin{equation}
     \begin{aligned}
@@ -57,7 +65,7 @@ $$
     \end{aligned}
     \tag{P}
 \end{equation}
-$$
+$$ -->
 
 Note that this problem still presents a quadratic objective, but it can easily be handled by the Gurobi optimizer using second order cones. 
 
@@ -66,7 +74,12 @@ This formulation takes care of non-linearities within the problem by adding many
 ## Column Generation Approach
 
 To tackle the scalability issue we developed a set partitioning reformulation of the problem, in which each partition will be a cluster. We will minimize the total cost $P_{c}$ of a clustering solution $c$ over all of the possible clustering combinations (the set $C$). The problem can be formulated as: 
-$$
+
+<p align="center">
+<img src="imgs/MP.png" width="800"/>
+</p>
+
+<!-- $$
 \begin{equation}
     \begin{aligned}
         \min_{x} &	\quad  \sum_{c \in C} P_{c}x_{c} \\
@@ -76,7 +89,7 @@ $$
     \end{aligned}
     \tag{MP}
 \end{equation}
-$$
+$$ -->
 
 This reformulation, which is seemingly very easy, hides it's complexity in the set $C$. This set is in fact the set of all possible clusters that can be created from a set of $N$ points and it has cardinality of $2^{N}$.
 
@@ -84,12 +97,16 @@ This formulation presents an exponential number of variable, thus to solve it we
 
 In this context, the subproblem is: 
 
-$$
+<p align="center">
+<img src="imgs/SP.png" width="800"/>
+</p>
+
+<!-- $$
 \begin{equation}
         \overline{P_{c^{*}}} = \min_{c \in C} \{ P_{c} - \sum_{i=1}^{N} a_{ic} p^{*}_{i} - K b^{*}\}
     \tag{SP}
 \end{equation}
-$$
+$$ -->
 
 ### **Subproblem solution**
 
